@@ -123,7 +123,7 @@
         var externalApi = null;
 
         var callbacks = {
-            appid: 20259,
+            appid: 20540,
 
             getLoginStatusCallback: function(status) {},
             userInfoCallback: function(info) {},
@@ -133,7 +133,14 @@
             getAuthTokenCallback: function(token) {},
             paymentReceivedCallback: function(data) {},
             paymentWindowClosedCallback: function() {},
-            userConfirmCallback: function() {}
+            userConfirmCallback: function() {},
+            paymentFrameItem: function(args){},
+            getGameInventoryItems: function(){},
+
+            adsCallback: function(context) {
+                console.log( 'adsCallback', context )
+                play_level( get_ads_num() )
+            },
         };
 
         function error(err) {
@@ -150,5 +157,7 @@
         iframeApi(callbacks).then(connected, error);
     }(window.iframeApi));
     </script>
+
+
   </body>
 </html>
