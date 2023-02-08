@@ -6,6 +6,85 @@
   <title>Unity WebGL Player | Don't touch yhe spikes</title>
   <link rel="shortcut icon" href="TemplateData/favicon.ico">
   <link rel="stylesheet" href="TemplateData/style.css">
+  <script type="text/javascript" src="//vkplay.ru/app/20540/static/mailru.core.js"></script>
+  <script type="text/javascript">
+      (function apiHandshake(iframeApi) {
+        if (typeof iframeApi === 'undefined') {
+          console.log('Cannot find iframeApi function, are we inside an iframe?');
+          return;
+        }
+
+        var config = {
+          interstitial: true,
+        }
+
+        var externalApi = null;
+
+        var callbacks = {
+          appid: 20540,
+
+          getLoginStatusCallback: function(status) {
+            window.getLoginStatusCallback(status)
+          },
+          userInfoCallback: function(info) {
+            window.userInfoCallback(info)
+          },
+          userProfileCallback: function(profile) {},
+          registerUserCallback: function(info) {
+            window.reloadWindow()
+          },
+          paymentFrameUrlCallback: function(url) {},
+          getAuthTokenCallback: function(token) {},
+          paymentReceivedCallback: function(data) {},
+          paymentWindowClosedCallback: function() {},
+          userConfirmCallback: function() {},
+          adsCallback: function(context) {
+            window.adsCallback(context)
+          },
+        };
+
+        function error(err) {
+          throw new Error('Could not init external api ' + err);
+        }
+
+        function connected(api) {
+          console.log('connected!')
+          externalApi = api;
+        }
+
+        iframeApi(callbacks).then(connected, error);
+
+        window.showAds = function() {
+          console.log('showAds invoked')
+          externalApi?.showAds(config);
+        };
+
+        window.getLoginStatus = function() {
+          console.log('getLoginStatus invoked');
+          externalApi?.getLoginStatus();
+        };
+
+        window.authUser = function() {
+          console.log('authUser invoked');
+          externalApi?.authUser();
+        };
+
+        window.registerUser = function() {
+          console.log('registerUser invoked');
+          externalApi?.registerUser();
+        }
+
+        window.userInfo = function() {
+          console.log('userInfo invoked')
+          externalApi?.userInfo();
+        }
+
+        window.reloadWindow = function() {
+          console.log('reloadWindow invoked')
+          externalApi?.reloadWindow()
+        }
+      }(window.iframeApi));
+    </script>
 </head>
 <body>
   <div id="unity-container" style="position: absolute; width: 100%; height: 100%">
@@ -94,70 +173,46 @@
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
         }).then((unityInstance) => {
-          unityI = unityInstance;
+          window.unityInstance = unityInstance;
           loadingBar.style.display = "none";
+
+          window.adsCallback = function(context) {
+            t = context.type
+            if (t === undefined)
+              t = 'adError'
+            console.log(t)
+            c = context.code
+            if (c === undefined)
+              c = 'adInternalError'
+            console.log(c)
+            //unityInstance.SendMessage('GAME_MANAGER', 'AdsCallback', t, c)
+          }
+
+          /*window.getLoginStatusCallback = function(status) {
+            console.log('getLoginStatusCallback invoked with status: ' + JSON.stringify(status));
+            if (status.status === 'ok')
+              unityInstance.SendMessage('GAME_MANAGER', 'GetLoginStatusCallback_Ok', status.loginStatus)
+            else if (status.status === 'error')
+              unityInstance.SendMessage('GAME_MANAGER', 'GetLoginStatusCallback_Error', status.errcode, status.errmsg)
+            else
+              console.log('Undefined status.status: ' + status.status)
+          }
+
+          window.userInfoCallback = function(status) {
+            console.log('userInfoCallback invoked with status: ' + JSON.stringify(status));
+            if (status.status === 'ok')
+              unityInstance.SendMessage('GAME_MANAGER', 'UserInfoCallback_Ok', parseInt(status.uid))
+            else if (status.status === 'error')
+              unityInstance.SendMessage('GAME_MANAGER', 'UserInfoCallback_Error', status.errcode, status.errmsg)
+            else
+              console.log('Undefined status.status: ' + status.status)
+          }*/
+
         }).catch((message) => {
           alert(message);
         });
       };
       document.body.appendChild(script);
     </script>
-
-    <!-- VK Play SDK -->
-    <script type="text/javascript" src="//vkplay.ru/app/20540/static/mailru.core.js"></script>
-
-    <script>
-
-      var vkApi = null;
-
-      var config = {
-        interstitial: true,
-      }
-
-    (function apiHandshake(iframeApi) {
-        if (typeof iframeApi === 'undefined') {
-            console.log('Cannot find iframeApi function, are we inside an iframe?');
-            return;
-        }
-
-        var externalApi = null;
-
-        var callbacks = {
-            appid: 20540,
-
-            getLoginStatusCallback: function(status) {},
-            userInfoCallback: function(info) {},
-            userProfileCallback: function(profile) {},
-            registerUserCallback: function(info) {},
-            paymentFrameUrlCallback: function(url) {},
-            getAuthTokenCallback: function(token) {},
-            paymentReceivedCallback: function(data) {},
-            paymentWindowClosedCallback: function() {},
-            userConfirmCallback: function() {},
-            paymentFrameItem: function(args){},
-            getGameInventoryItems: function(){},
-
-            adsCallback: function(context) {
-                console.log( 'adsCallback', context )
-                play_level( get_ads_num() )
-            },
-        };
-
-        function error(err) {
-            console.log( 'error', err )
-            throw new Error('Could not init external api ' + err);
-        }
-
-        function connected(api) {
-            console.log( 'API connected' )
-            externalApi = api;
-            vkApi = externalApi;
-        }
-
-        iframeApi(callbacks).then(connected, error);
-    }(window.iframeApi));
-    </script>
-
-
   </body>
 </html>
