@@ -108,7 +108,7 @@
 
     <script>
 
-      var vkApi;
+      var vkApi = null;
 
       var config = {
         interstitial: true,
@@ -149,8 +149,6 @@
 
         iframeApi(callbacks).then(connected, error);
     }(window.iframeApi));
-    
     </script>
-
   </body>
 </html>
